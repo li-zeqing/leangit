@@ -1,5 +1,5 @@
 # 判定输入是否为数字，如果是，请输出该数字，否则，输出"这不是一个数字"
-import unicodedata
+
 
 CN_NUM = {
     '〇': 0,
@@ -48,7 +48,7 @@ def is123(list_cn):
             return 1
 
 
-S = input("请输入：")
+# S = input("请输入：")
 
 
 def isNumber(cn, false=None):
@@ -62,6 +62,7 @@ def isNumber(cn, false=None):
             if cn.isnumeric():
                 lcn = list(cn)
                 unit = 0  # 当前的单位
+                tem_unit = [] #存单位
                 ldig = []  # 临时数组
 
                 # 处理没有单位的汉字，如一二三
@@ -72,12 +73,13 @@ def isNumber(cn, false=None):
                         ldig.append(dig)
                     return int("".join('%s' %id for id in ldig))
                 else:
-                    # 以“万”，“亿”，“兆”分隔成四位的汉字数字
+                    # 以“万”，“亿”，“兆”分隔成四位的汉字数字 ()兆()亿()万()
                     while lcn:
                         cndig = lcn.pop()  # 弹出列表的最后一个元素
 
                         if cndig in CN_UNIT:
                             unit = CN_UNIT.get(cndig)
+                            tem_unit.append(unit)#存储最后出现的单位
                             if unit == 10000:
                                 ldig.append('w')  # 标示万位
                                 unit = 1
@@ -104,6 +106,10 @@ def isNumber(cn, false=None):
 
                     ret = 0
                     tmp = 0
+                    #末尾单位不连续，比如“六千六”
+                    if(tem_unit[0]!=10 or tem_unit[0]!=0):
+                        ldig[0]= ldig[0]*tem_unit[0]*10**-1
+
 
                     while ldig:
                         x = ldig.pop()
@@ -132,11 +138,26 @@ def isNumber(cn, false=None):
         return false
 
 
-# 判定输入是否为汉字数字，如果是则输出“这是一个数字，<阿拉伯数字>”，否则输出“这不是一个数字”
 
-if (isNumber(S)):
-    print("这是一个数字，{:.2f}".format(isNumber(S)))
-else:
-    print("这不是一个数字")
+if __name__ == '__main__':
+
+    test_dig = ['20',
+                '贰佰叁拾',
+                '叁仟陆',
+                '一二三',
+                'A'
+                ]
+    # 判定输入是否为汉字数字，如果是则输出“这是一个数字，<阿拉伯数字>”，否则输出“这不是一个数字”
+    for S in test_dig:
+        print(S)
+
+        if (isNumber(S)):
+            print("这是一个数字，{:.2f}".format(isNumber(S)))
+        else:
+            print("这不是一个数字")
+        print('*' * 50)
+
+
+
 
 
