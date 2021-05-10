@@ -1,5 +1,5 @@
 # 判定输入是否为数字，如果是，请输出该数字，否则，输出"这不是一个数字"
-
+import unicodedata
 
 CN_NUM = {
     '〇': 0,
@@ -65,13 +65,14 @@ def isNumber(cn, false=None):
                 tem_unit = [] #存单位
                 ldig = []  # 临时数组
 
-                # 处理没有单位的汉字，如一二三
+                #处理没有单位的汉字，如一二三、一零二四
                 if (is123(lcn) == None):
-                    while lcn:
-                        cndig = lcn.pop(0)
-                        dig = CN_NUM.get(cndig)
-                        ldig.append(dig)
-                    return int("".join('%s' %id for id in ldig))
+                    s = 0
+                    t = 10 ** (len(lcn) - 1)
+                    for i in lcn:
+                        s += unicodedata.numeric(i) * t
+                        t = t / 10
+                    return s
                 else:
                     # 以“万”，“亿”，“兆”分隔成四位的汉字数字 ()兆()亿()万()
                     while lcn:
@@ -98,17 +99,19 @@ def isNumber(cn, false=None):
                             if unit:
                                 dig = dig * unit
                                 unit = 0
+                            if dig == 0:
+                                 tem_unit.append(dig)  # 存储最后出现的单位
 
                             ldig.append(dig)
-
                     if unit == 10:  # 处理10-19的数字
                         ldig.append(10)
 
                     ret = 0
                     tmp = 0
                     #末尾单位不连续，比如“六千六”
-                    if(tem_unit[0]!=10 or tem_unit[0]!=0):
+                    if(  tem_unit[0] !=0 and tem_unit[0]!=10):
                         ldig[0]= ldig[0]*tem_unit[0]*10**-1
+
 
 
                     while ldig:
@@ -140,12 +143,22 @@ def isNumber(cn, false=None):
 
 
 if __name__ == '__main__':
-
+    # test_dig =[
+    #
+    #             '一万零二百零三',
+    #               '叁仟陆'
+    #             ]
     test_dig = ['20',
+                '十九',
                 '贰佰叁拾',
+                '三百零八',
+                '三百八十',
                 '叁仟陆',
                 '一二三',
+                '一零二三',
+                '一万零二百零三',
                 'A'
+
                 ]
     # 判定输入是否为汉字数字，如果是则输出“这是一个数字，<阿拉伯数字>”，否则输出“这不是一个数字”
     for S in test_dig:
